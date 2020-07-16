@@ -37,12 +37,6 @@ listProxyPages = [
 		]
 
 
-
-
-
-
-
-
 def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 	'''
 		Функция должна: 
@@ -176,8 +170,6 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 		
 		print('You choso Scrapy')
 
-
-
 def Get_ProxyIP(html):
 	''' Собрать IP прокси на странице
 		Вернуть список собраных IP в формате IP:port
@@ -245,10 +237,6 @@ def check_CaptchaPage(html):
 
 
 
-
-
-
-
 # ##################################################################################################################
 # ##################################################################################################################
 
@@ -277,40 +265,39 @@ if __name__ == '__main__':
 			if not link_NextPage:
 				URL_Next_Page = URL
 
+			#  Тестовая печать перед входом в ф-цию:
 			print('URL_Next_Page:     ' + URL_Next_Page)
 			print('IP_proxy:     ' + IP_proxy)
 			
 			arr_result = Get_HTML(URL_Next_Page,1,IP_proxy,1,driver)	# функция возвратит arr_result[html,driver]
 			html = arr_result[0]
-
+			try:		# на тот случай если Get_HTML() вернёт только arr_result[0]
+				driver = arr_result[1]
+			except Exception as e:
+				pass
 
 			if check_CaptchaPage(html) == 'CAPTCHA':
 				if not listProxy:
-					print('Страница Каптчи, Proxy HET')
+					print('Получена CAPTCHA, списка прокси нет')
 					html = False
-					break
+					break 				# эта строка должна закончить оброботку текущего URLа и переходить к следующему
 				else:
 					if count_ProxyIP < len(result_listProxy):
+						# Перебираю listProxy
 						IP_proxy = result_listProxy[count_ProxyIP]
 						count_ProxyIP += 1
 						
 						print('count_ProxyIP:    ' + str(count_ProxyIP))
-						print('Страница Каптчи, меняю IP')
-
-						Get_HTML('https://2ip.ua/ru',1,IP_proxy)
-
-
+						print('Меняю IP')
 					else:
-						print('Страница Каптчи, Proxy HET')
-						html = False
-						break	
-
-					# print('IP_proxy:    ' + IP_proxy)
-					continue
+						print('Список прокси закончился')
+!!!!!!!!!!!!!!!!!		x = input('Перебрать список прокси снова? y/n - ')   #   !!!!!!!!!!!!!!!!!    Добавить таймер по истечению которого програма сама пойдёт на повторный круг
+						sleep(5)
+						count_ProxyIP = 0
+					continue # эта строка должна вернуть прогамму к обработке тогоже URLа но сдругим IP
 
 			if html:
-
-				driver = arr_result[1]
+				
 				listProxy = Get_ProxyIP(html)
 				
 				print(listProxy)
