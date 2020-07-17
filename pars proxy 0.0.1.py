@@ -6,35 +6,44 @@ from selenium import webdriver	# импортирую модуль вебдра�
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
 from selenium.webdriver.firefox.options import Options
 import selenium.common.exceptions
+import time
+import keyboard
 
 
 
 result_listProxy = []
 result = []
+timeout = 5		# время ожидания, в секундах, нажатия клавиши для повторного перебора result_listProxy при попаданиии страницы каптчи
 
 pathFile = os.path.dirname(__file__)	
 
 listProxyPagesURLs	 = [
-	'http://www.freeproxylists.net/ru/',			# по этому URLу всё работает но сам сайт блокируеться по IP изначально!
-	'http://free-proxy.cz/en/',						# # по этому URLу всё работает но только 5 страниц дальше каптча!
+	'http://free-proxy.cz/en/',						# по этому URLу всё работает но только 5 страниц дальше каптча!
+	'http://www.freeproxylists.net/ru/',			    # по этому URLу всё работает но сам сайт блокируеться по IP изначально!
 	# 'https://hidemy.name/ru/proxy-list/',
 	# 'http://foxtools.ru/Proxy',		# нет ссылки "Следующая"
 	# 'https://htmlweb.ru/analiz/proxy_list.php?perpage=50#%D0%9A%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%20%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8', # нет ссылки "Следующая"
 	# 'https://hidester.com/proxylist/',
 	]
 
-listProxyPages = [
-		# 'Proxy_pages/captcha_page from free-proxy.cz.html',
+listProxyPages = [    				# для тестов
+		# 'Proxy_pages/captcha_page from free-proxy.cz.html',  
 		# 'Proxy_pages/freeproxylists.net.html',
 		# 'Proxy_pages/free-proxy.cz.html',		
 		# 'Proxy_pages/foxtools.ru.html',			
 		# 'Proxy_pages/htmlweb.ru.html',			
-	# 	'Proxy_pages/foxtools.ru.txt'
-	# 	'Proxy_pages/hidester.com.txt',
+	 	# 'Proxy_pages/foxtools.ru.txt',
+	 	# 'Proxy_pages/hidester.com.txt',
 		]
+
+
+# result_listProxy = [				# для тестов
+	# '195.154.39.255:5836', 
+	# '206.127.88.18:80', 
+	# ]
+
 
 
 def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
@@ -77,12 +86,8 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 		print('You must input only str')
 		return False
 
-
 	if mode == 1:
 		print('You choso Selenium:')
-		
-		
-
 
 		if flag_return_driver == 0 or driver == False:
 			
@@ -93,51 +98,27 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 			driver = webdriver.Firefox(executable_path=pathDriver,options=opts)		
 		try:
 			driver.get(URL)
-			
 			try:
 				WebDriverWait(driver, 5).until(lambda driver: 
-					# driver.find_elements_by_xpath('/html/body/div[1]/div[4]/div/div[4]/table/thead/tr/td[1]'))  # работает
-					# driver.find_elements_by_xpath(".//td[text()='IP адрес']"))  # работает
 					driver.find_elements_by_xpath("//*[.='IP адрес']"))  
-
 			except Exception as errMess:
-				print('Элемент не найден')
-				print(errMess)
+				pass
+				# print('Элемент не найден')
+				# print(errMess)
 			# time.sleep(3)			
 
 			html = driver.page_source
-			
-			# print('\n\n *****************************************************')
-			# print(html)
-			# print('\n\n *****************************************************')
-
-
 		# Оброботка исключний:
 		except Exception as errMess:
-			
-			print('EERRR')
-			print(errMess)
-			if flag_return_driver:	
-				html = [False]		
-			else:
-				html = False		
+			print('Текущий URL недоступен')
+			html = False		
 		
 		# Вывод результатов в зависимости от значения flag_return_driver
 		if flag_return_driver and html:
-			arr_result = [
-				html,
-				driver
-			]
-			
-			# print('\n\n******************************************************************************')
-			# print(html)
-			# print('\n\n******************************************************************************')
+			arr_result = [html,driver]
 			return arr_result
 
-
-
-		print('driver.close()	# закрываю браузер')
-		# driver.close()	# закрываю браузер
+		driver.close()	# закрываю браузер
 		return html
 
 
@@ -205,33 +186,25 @@ def Get_LinkNextPage(html):
 	# pattern = r'<a href="([\w\d/\?=\.]+)">(?:Следующая)|(?:Next) »</a>'	 
 	pattern = r'"([\w\d/\?=\.]+)">(?=(?:Следующая)|(?:Next) »</a>)'	 
 
-
 	href_ = re.findall(pattern,html)
-
 	if len(href_) > 1:
 		link_NextPage = re.sub(r'^[\./en]*','',href_[1])
-		
-		print("\n")
-		print('href_              ' + href_[1])
-		print('link_NextPage:     ' + link_NextPage)
-
 	else:
 		print('Следующей страницы НЕТ \n')
 		link_NextPage = None
-
 	return link_NextPage
 
 def check_CaptchaPage(html):
-	
+	'''
+		добавить патерны для разных страниц блокировки
 
-	try:
-		print('check_CaptchaPage(html): page CAPTCH')
-		if re.search('complete CAPTCHA to continue',html): return 'CAPTCHA'
+	'''
+
+	try: 
+		if re.search('complete CAPTCHA to continue',html): 
+			return 'CAPTCHA'
 	except:
 		print('check_CaptchaPage(html): NOT page CAPTCH')
-		# return 'CAPTCHA'
-
-		pass
 
 	return True
 
@@ -256,7 +229,7 @@ if __name__ == '__main__':
 		print(URL)
 		# print(fileName)
 		
-		while flag_page_enumeration:			# цыкл продолжается пока есть ссылка на сл. страницу
+		while flag_page_enumeration:			# цикл продолжается пока есть ссылка на сл. страницу
 			# для тестов:
 			# with open(fileName,'r',encoding="utf-8") as file_handler:
 			# 	html = file_handler.read()
@@ -265,15 +238,11 @@ if __name__ == '__main__':
 			if not link_NextPage:
 				URL_Next_Page = URL
 
-			#  Тестовая печать перед входом в ф-цию:
-			print('URL_Next_Page:     ' + URL_Next_Page)
-			print('IP_proxy:     ' + IP_proxy)
-			
 			arr_result = Get_HTML(URL_Next_Page,1,IP_proxy,1,driver)	# функция возвратит arr_result[html,driver]
 			html = arr_result[0]
 			try:		# на тот случай если Get_HTML() вернёт только arr_result[0]
 				driver = arr_result[1]
-			except Exception as e:
+			except Exception as e:				# TODO:   Уточнить ошибку иначе будет срабатывать при любой до этого места
 				pass
 
 			if check_CaptchaPage(html) == 'CAPTCHA':
@@ -282,25 +251,31 @@ if __name__ == '__main__':
 					html = False
 					break 				# эта строка должна закончить оброботку текущего URLа и переходить к следующему
 				else:
-					if count_ProxyIP < len(result_listProxy):
-						# Перебираю listProxy
-						IP_proxy = result_listProxy[count_ProxyIP]
+					if count_ProxyIP < len(result_listProxy):			# Перебираю result_listProxy
+						IP_proxy = result_listProxy[count_ProxyIP]    
 						count_ProxyIP += 1
-						
-						print('count_ProxyIP:    ' + str(count_ProxyIP))
-						print('Меняю IP')
+						print(str(count_ProxyIP) + '. ' + IP_proxy)
 					else:
-						print('Список прокси закончился')
-!!!!!!!!!!!!!!!!!		x = input('Перебрать список прокси снова? y/n - ')   #   !!!!!!!!!!!!!!!!!    Добавить таймер по истечению которого програма сама пойдёт на повторный круг
-						sleep(5)
-						count_ProxyIP = 0
+						time1 = time.time()
+						time2 = time.time()
+						print("\n Перебор доступного списка прокси окончен.")
+						print("Для повторного перебора нажмите Enter...")
+						print("Для перехода к следующему сайту нажмите ПРОБЕЛ...\n")
+						while time2 - time1 < timeout:
+							if keyboard.is_pressed('Enter'):
+								count_ProxyIP = 1
+								break
+							elif keyboard.is_pressed('space'):
+								count_ProxyIP = False  # т.е. count_ProxyIP в данном случае используеться как флаг по которому программа выйдет из внешнего цыкла
+								break
+							time2 = time.time()
+					if count_ProxyIP == False:	
+						break
 					continue # эта строка должна вернуть прогамму к обработке тогоже URLа но сдругим IP
-
 			if html:
-				
 				listProxy = Get_ProxyIP(html)
 				
-				print(listProxy)
+				print(listProxy)		# для тестов
 				
 				for IP_Port in listProxy:
 					result_listProxy.append(IP_Port)
@@ -308,17 +283,20 @@ if __name__ == '__main__':
 				
 				if link_NextPage:			
 					URL_Next_Page = URL + link_NextPage
-					print('URL_Next_Page:     ' + URL_Next_Page)
+
+					print('\n' + URL_Next_Page)
 
 				else:
 					flag_page_enumeration = 0
 					# driver.close()	# закрываю браузер
 
-
 			else:
 
 				continue
-		
+	
+	if driver:	
+		driver.close()	# закрываю браузер если он всё ещё открыт
+
 	print('\n\n')
 	print(result_listProxy)
 

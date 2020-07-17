@@ -1,0 +1,12 @@
+# Список строк которые необходимо проверить:
+
+	if flag_return_driver == 0 or driver == False: 
+	
+	while flag_page_enumeration:
+	
+	try:		# на тот случай если Get_HTML() вернёт только arr_result[0]
+		driver = arr_result[1]
+	except Exception as e:				# TODO:   Уточнить ошибку иначе будет срабатывать при любой до этого места
+		pass
+
+	if check_CaptchaPage(html) == 'CAPTCHA':   # Возможны защитные страницы баз надписи CAPTCHA. Добавить патернов в check_CaptchaPage()
