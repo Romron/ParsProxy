@@ -13,7 +13,7 @@ import keyboard
 
 
 
-result_listProxy = []
+# result_listProxy = []
 result = []
 timeout = 5		# время ожидания, в секундах, нажатия клавиши для повторного перебора result_listProxy при попаданиии страницы каптчи
 
@@ -90,11 +90,20 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 		print('You choso Selenium:')
 
 		if flag_return_driver == 0 or driver == False:
-			
 
 			pathDriver = os.path.dirname(os.path.abspath(__file__)) + "/geckodriver.exe"
 			opts = Options()
 			opts.headless = False
+
+			if IP_proxy:
+				print(IP_proxy)
+				webdriver.DesiredCapabilities.FIREFOX['proxy'] = {
+				    "httpProxy": IP_proxy,
+				    "ftpProxy": IP_proxy,
+				    "sslProxy": IP_proxy,
+				    "proxyType": "MANUAL",
+					}
+
 			driver = webdriver.Firefox(executable_path=pathDriver,options=opts)		
 		try:
 			driver.get(URL)
@@ -196,15 +205,18 @@ def Get_LinkNextPage(html):
 
 def check_CaptchaPage(html):
 	'''
-		добавить патерны для разных страниц блокировки
+		TODO: добавить патерны для разных страниц блокировки
 
 	'''
 
 	try: 
 		if re.search('complete CAPTCHA to continue',html): 
 			return 'CAPTCHA'
+		# elif re.search('',html):
+		# 	return 'CAPTCHA'
+
 	except:
-		print('check_CaptchaPage(html): NOT page CAPTCH')
+		print('check_CaptchaPage(): Блокировки сайта не найдено')
 
 	return True
 
@@ -239,18 +251,25 @@ if __name__ == '__main__':
 				URL_Next_Page = URL
 
 			arr_result = Get_HTML(URL_Next_Page,1,IP_proxy,1,driver)	# функция возвратит arr_result[html,driver]
-			html = arr_result[0]
-			try:		# на тот случай если Get_HTML() вернёт только arr_result[0]
-				driver = arr_result[1]
-			except Exception as e:				# TODO:   Уточнить ошибку иначе будет срабатывать при любой до этого места
-				pass
+			if type(arr_result) == bool:
+				html = arr_result
+				if html == False:
+					pass
 
-			if check_CaptchaPage(html) == 'CAPTCHA':
-				if not listProxy:
-					print('Получена CAPTCHA, списка прокси нет')
-					html = False
-					break 				# эта строка должна закончить оброботку текущего URLа и переходить к следующему
-				else:
+
+
+			elif type(arr_result) == list:
+				html = arr_result[0]
+				try:			# на тот случай если Get_HTML() вернёт только arr_result[0]
+					driver = arr_result[1]
+				except IndexError:
+					pass
+
+			if check_CaptchaPage(html) == 'CAPTCHA' or html == False:
+
+				try:			# если result_listProxy нет 
+					if len(result_listProxy) == 0:   # если result_listProxy есть, но он равен нулю
+						raise NameError			# генерирую исключение
 					if count_ProxyIP < len(result_listProxy):			# Перебираю result_listProxy
 						IP_proxy = result_listProxy[count_ProxyIP]    
 						count_ProxyIP += 1
@@ -258,7 +277,7 @@ if __name__ == '__main__':
 					else:
 						time1 = time.time()
 						time2 = time.time()
-						print("\n Перебор доступного списка прокси окончен.")
+						print("\n Перебор доступного списка прокси окончен. В списке было  " + count_ProxyIP + " прокси")
 						print("Для повторного перебора нажмите Enter...")
 						print("Для перехода к следующему сайту нажмите ПРОБЕЛ...\n")
 						while time2 - time1 < timeout:
@@ -272,6 +291,12 @@ if __name__ == '__main__':
 					if count_ProxyIP == False:	
 						break
 					continue # эта строка должна вернуть прогамму к обработке тогоже URLа но сдругим IP
+			
+				except NameError:
+					print('Сайт заблокирован, списка прокси нет')
+					html = False
+					break 				# эта строка должна закончить оброботку текущего URLа и переходить к следующему 
+
 			if html:
 				listProxy = Get_ProxyIP(html)
 				
