@@ -10,10 +10,11 @@ from selenium.webdriver.firefox.options import Options
 import selenium.common.exceptions
 import time
 import keyboard
+import tkinter                 #  библиотека для графических интерфейсов 
 
 
 
-# result_listProxy = []
+result_listProxy = []
 result = []
 timeout = 5		# время ожидания, в секундах, нажатия клавиши для повторного перебора result_listProxy при попаданиии страницы каптчи
 
@@ -44,6 +45,9 @@ listProxyPages = [    				# для тестов
 	# '206.127.88.18:80', 
 	# ]
 
+
+# test_IP_URL = 'https://2ip.ru/'		# слишком долго грузиться
+test_IP_URL = 'https://myip.ru/'
 
 
 def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
@@ -87,13 +91,20 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 		return False
 
 	if mode == 1:
-		print('You choso Selenium:')
+		# print('You choso Selenium:')
 
 		if flag_return_driver == 0 or driver == False:
 
+			r = tkinter.Tk()		# получаем объект для доступа к параметрам экрана
 			pathDriver = os.path.dirname(os.path.abspath(__file__)) + "/geckodriver.exe"
 			opts = Options()
 			opts.headless = False
+			opts.add_argument('-width=' + str(r.winfo_screenwidth()/2))		# Устанавливаем ширину окна 
+			opts.add_argument('-height=' + str(r.winfo_screenheight()/1.3))	# Устанавливаем высоту окна
+			
+
+			driver = webdriver.Firefox(executable_path=pathDriver,options=opts)	
+			driver.set_window_position(r.winfo_screenwidth()/2, 0)	
 
 			if IP_proxy:
 				print(IP_proxy)
@@ -104,9 +115,9 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 				    "proxyType": "MANUAL",
 					}
 
-			driver = webdriver.Firefox(executable_path=pathDriver,options=opts)		
 		try:
 			driver.get(URL)
+
 			try:
 				WebDriverWait(driver, 5).until(lambda driver: 
 					driver.find_elements_by_xpath("//*[.='IP адрес']"))  
@@ -117,6 +128,13 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 			# time.sleep(3)			
 
 			html = driver.page_source
+
+			# для теста IP
+			driver.execute_script("window.open()")		# открыть новую вкладку
+			two_Window = driver.window_handles[1]
+			driver.switch_to.window(two_Window)
+			driver.get(test_IP_URL)
+
 		# Оброботка исключний:
 		except Exception as errMess:
 			print('Текущий URL недоступен')
@@ -127,7 +145,8 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 			arr_result = [html,driver]
 			return arr_result
 
-		driver.close()	# закрываю браузер
+		# driver.close()	# закрываю браузер
+		driver.quit()	# закрываю браузер
 		return html
 
 
@@ -255,9 +274,6 @@ if __name__ == '__main__':
 				html = arr_result
 				if html == False:
 					pass
-
-
-
 			elif type(arr_result) == list:
 				html = arr_result[0]
 				try:			# на тот случай если Get_HTML() вернёт только arr_result[0]
@@ -320,7 +336,8 @@ if __name__ == '__main__':
 				continue
 	
 	if driver:	
-		driver.close()	# закрываю браузер если он всё ещё открыт
+		# driver.close()	# закрываю браузер если он всё ещё открыт
+		driver.quit()	# закрываю браузер если он всё ещё открыт
 
 	print('\n\n')
 	print(result_listProxy)
