@@ -107,7 +107,6 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 			driver.set_window_position(r.winfo_screenwidth()/2, 0)	
 
 			if IP_proxy:
-				print(IP_proxy)
 				webdriver.DesiredCapabilities.FIREFOX['proxy'] = {
 				    "httpProxy": IP_proxy,
 				    "ftpProxy": IP_proxy,
@@ -125,15 +124,9 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 				pass
 				# print('Элемент не найден')
 				# print(errMess)
-			# time.sleep(3)			
 
 			html = driver.page_source
 
-			# для теста IP
-			driver.execute_script("window.open()")		# открыть новую вкладку
-			two_Window = driver.window_handles[1]
-			driver.switch_to.window(two_Window)
-			driver.get(test_IP_URL)
 
 		# Оброботка исключний:
 		except Exception as errMess:
@@ -290,6 +283,14 @@ if __name__ == '__main__':
 						IP_proxy = result_listProxy[count_ProxyIP]    
 						count_ProxyIP += 1
 						print(str(count_ProxyIP) + '. ' + IP_proxy)
+
+						# для теста IP
+						driver_test = Get_HTML(test_IP_URL,1,IP_proxy,1)
+						try:
+							driver_test[1].close()	# закрываю текущую вкладку
+						except Exception as e:
+							print("   fail")
+
 					else:
 						time1 = time.time()
 						time2 = time.time()
@@ -317,7 +318,7 @@ if __name__ == '__main__':
 				listProxy = Get_ProxyIP(html)
 				
 				print(listProxy)		# для тестов
-				
+
 				for IP_Port in listProxy:
 					result_listProxy.append(IP_Port)
 				link_NextPage = Get_LinkNextPage(html)
