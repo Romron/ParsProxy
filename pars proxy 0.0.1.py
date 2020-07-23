@@ -21,8 +21,8 @@ timeout = 5		# время ожидания, в секундах, нажатия 
 pathFile = os.path.dirname(__file__)	
 
 listProxyPagesURLs	 = [
-	'http://free-proxy.cz/en/',						# по этому URLу всё работает но только 5 страниц дальше каптча!
 	'http://www.freeproxylists.net/ru/',			    # по этому URLу всё работает но сам сайт блокируеться по IP изначально!
+	'http://free-proxy.cz/en/',						# по этому URLу всё работает но только 5 страниц дальше без каптчи не пускает!
 	# 'https://hidemy.name/ru/proxy-list/',
 	# 'http://foxtools.ru/Proxy',		# нет ссылки "Следующая"
 	# 'https://htmlweb.ru/analiz/proxy_list.php?perpage=50#%D0%9A%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%20%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8', # нет ссылки "Следующая"
@@ -47,7 +47,12 @@ listProxyPages = [    				# для тестов
 
 
 # test_IP_URL = 'https://2ip.ru/'		# слишком долго грузиться
-test_IP_URL = 'https://myip.ru/'
+# test_IP_URL = 'https://myip.ru/'
+
+
+
+
+
 
 
 def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
@@ -275,22 +280,15 @@ if __name__ == '__main__':
 					pass
 
 			if check_CaptchaPage(html) == 'CAPTCHA' or html == False:
-
 				try:			# если result_listProxy нет 
+					if re.search('http://free-proxy.cz/en',URL_Next_Page):
+						raise NameError			# генерирую исключение т.к. этот сайт не пускает дальше 5 страницы без каптчи
 					if len(result_listProxy) == 0:   # если result_listProxy есть, но он равен нулю
 						raise NameError			# генерирую исключение
 					if count_ProxyIP < len(result_listProxy):			# Перебираю result_listProxy
-						IP_proxy = result_listProxy[count_ProxyIP]    
+						IP_proxy = result_listProxy[coиunt_ProxyIP]    
 						count_ProxyIP += 1
 						print(str(count_ProxyIP) + '. ' + IP_proxy)
-
-						# для теста IP
-						driver_test = Get_HTML(test_IP_URL,1,IP_proxy,1)
-						try:
-							driver_test[1].close()	# закрываю текущую вкладку
-						except Exception as e:
-							print("   fail")
-
 					else:
 						time1 = time.time()
 						time2 = time.time()
