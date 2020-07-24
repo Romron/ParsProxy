@@ -337,16 +337,6 @@ if __name__ == '__main__':
 		# driver.close()	# закрываю браузер если он всё ещё открыт
 		driver.quit()	# закрываю браузер если он всё ещё открыт
 
-	#============= Записываем полученные прокси в файл: ============
-	pathDir = os.path.dirname(os.path.abspath(__file__)) +  "/Proxylist"		
-	if not os.path.exists(pathDir) :
-		os.mkdir(pathDir)
-
-	timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
-	fileName = pathDir + '/proxylist '+ timePars +' .json'
-	with open(fileName, 'w', encoding = 'utf-8') as f:
-		json.dump(Films, f, indent = 2, ensure_ascii = False)
-
 
 	print('\n\n')
 	print(result_listProxy)
