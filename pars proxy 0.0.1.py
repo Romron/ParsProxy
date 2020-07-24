@@ -341,6 +341,8 @@ if __name__ == '__main__':
 	print('\n\n')
 	print(result_listProxy)
 
+# Этот участок кода почемуто не запушилсе в original 
+
 #============= Записываем полученные прокси в файл: ============
 pathDir = os.path.dirname(os.path.abspath(__file__)) +  "/Proxylist"		
 if not os.path.exists(pathDir) :
