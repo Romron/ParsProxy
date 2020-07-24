@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.options import Options
 import selenium.common.exceptions
 import time
+import json
 import keyboard
 import tkinter                 #  библиотека для графических интерфейсов 
 
@@ -21,8 +22,8 @@ timeout = 5		# время ожидания, в секундах, нажатия 
 pathFile = os.path.dirname(__file__)	
 
 listProxyPagesURLs	 = [
-	'http://www.freeproxylists.net/ru/',			    # по этому URLу всё работает но сам сайт блокируеться по IP изначально!
 	'http://free-proxy.cz/en/',						# по этому URLу всё работает но только 5 страниц дальше без каптчи не пускает!
+	'http://www.freeproxylists.net/ru/',			    # по этому URLу всё работает но сам сайт блокируеться по IP изначально!
 	# 'https://hidemy.name/ru/proxy-list/',
 	# 'http://foxtools.ru/Proxy',		# нет ссылки "Следующая"
 	# 'https://htmlweb.ru/analiz/proxy_list.php?perpage=50#%D0%9A%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%20%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8', # нет ссылки "Следующая"
@@ -341,4 +342,12 @@ if __name__ == '__main__':
 	print('\n\n')
 	print(result_listProxy)
 
+#============= Записываем полученные прокси в файл: ============
+pathDir = os.path.dirname(os.path.abspath(__file__)) +  "/Proxylist"		
+if not os.path.exists(pathDir) :
+	os.mkdir(pathDir)
 
+timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
+fileName = pathDir + '/proxylist '+ timePars +' .json'
+with open(fileName, 'w', encoding = 'utf-8') as f:
+	json.dump(result_listProxy, f, indent = 2, ensure_ascii = False)	# json.dump() сама пишит в файл
