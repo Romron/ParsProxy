@@ -10,6 +10,7 @@ from selenium.webdriver.firefox.options import Options
 import selenium.common.exceptions
 import time
 import keyboard
+import tkinter                 #  библиотека для графических интерфейсов 
 
 
 
@@ -20,8 +21,8 @@ timeout = 5		# время ожидания, в секундах, нажатия 
 pathFile = os.path.dirname(__file__)	
 
 listProxyPagesURLs	 = [
-	'http://free-proxy.cz/en/',						# по этому URLу всё работает но только 5 страниц дальше каптча!
 	'http://www.freeproxylists.net/ru/',			    # по этому URLу всё работает но сам сайт блокируеться по IP изначально!
+	'http://free-proxy.cz/en/',						# по этому URLу всё работает но только 5 страниц дальше без каптчи не пускает!
 	# 'https://hidemy.name/ru/proxy-list/',
 	# 'http://foxtools.ru/Proxy',		# нет ссылки "Следующая"
 	# 'https://htmlweb.ru/analiz/proxy_list.php?perpage=50#%D0%9A%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%20%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8', # нет ссылки "Следующая"
@@ -43,6 +44,14 @@ listProxyPages = [    				# для тестов
 	# '195.154.39.255:5836', 
 	# '206.127.88.18:80', 
 	# ]
+
+
+# test_IP_URL = 'https://2ip.ru/'		# слишком долго грузиться
+# test_IP_URL = 'https://myip.ru/'
+
+
+
+
 
 
 
@@ -87,26 +96,31 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 		return False
 
 	if mode == 1:
-		print('You choso Selenium:')
+		# print('You choso Selenium:')
 
 		if flag_return_driver == 0 or driver == False:
 
+			r = tkinter.Tk()		# получаем объект для доступа к параметрам экрана
 			pathDriver = os.path.dirname(os.path.abspath(__file__)) + "/geckodriver.exe"
 			opts = Options()
 			opts.headless = False
+			opts.add_argument('-width=' + str(r.winfo_screenwidth()/2))		# Устанавливаем ширину окна 
+			opts.add_argument('-height=' + str(r.winfo_screenheight()/1.3))	# Устанавливаем высоту окна
+			
+
+			driver = webdriver.Firefox(executable_path=pathDriver,options=opts)	
+			driver.set_window_position(r.winfo_screenwidth()/2, 0)	
 
 			if IP_proxy:
-				print(IP_proxy)
 				webdriver.DesiredCapabilities.FIREFOX['proxy'] = {
 				    "httpProxy": IP_proxy,
 				    "ftpProxy": IP_proxy,
 				    "sslProxy": IP_proxy,
 				    "proxyType": "MANUAL",
 					}
-
-			driver = webdriver.Firefox(executable_path=pathDriver,options=opts)		
 		try:
 			driver.get(URL)
+
 			try:
 				WebDriverWait(driver, 5).until(lambda driver: 
 					driver.find_elements_by_xpath("//*[.='IP адрес']"))  
@@ -114,9 +128,10 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 				pass
 				# print('Элемент не найден')
 				# print(errMess)
-			# time.sleep(3)			
 
 			html = driver.page_source
+
+
 		# Оброботка исключний:
 		except Exception as errMess:
 			print('Текущий URL недоступен')
@@ -127,7 +142,8 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 			arr_result = [html,driver]
 			return arr_result
 
-		driver.close()	# закрываю браузер
+		# driver.close()	# закрываю браузер
+		driver.quit()	# закрываю браузер
 		return html
 
 
@@ -253,11 +269,6 @@ if __name__ == '__main__':
 			arr_result = Get_HTML(URL_Next_Page,1,IP_proxy,1,driver)	# функция возвратит arr_result[html,driver]
 			if type(arr_result) == bool:
 				html = arr_result
-				if html == False:
-					pass
-
-
-
 			elif type(arr_result) == list:
 				html = arr_result[0]
 				try:			# на тот случай если Get_HTML() вернёт только arr_result[0]
@@ -266,12 +277,13 @@ if __name__ == '__main__':
 					pass
 
 			if check_CaptchaPage(html) == 'CAPTCHA' or html == False:
-
 				try:			# если result_listProxy нет 
+					if re.search('http://free-proxy.cz/en',URL_Next_Page):
+						raise NameError			# генерирую исключение т.к. этот сайт не пускает дальше 5 страницы без каптчи
 					if len(result_listProxy) == 0:   # если result_listProxy есть, но он равен нулю
 						raise NameError			# генерирую исключение
 					if count_ProxyIP < len(result_listProxy):			# Перебираю result_listProxy
-						IP_proxy = result_listProxy[count_ProxyIP]    
+						IP_proxy = result_listProxy[coиunt_ProxyIP]    
 						count_ProxyIP += 1
 						print(str(count_ProxyIP) + '. ' + IP_proxy)
 					else:
@@ -301,7 +313,7 @@ if __name__ == '__main__':
 				listProxy = Get_ProxyIP(html)
 				
 				print(listProxy)		# для тестов
-				
+
 				for IP_Port in listProxy:
 					result_listProxy.append(IP_Port)
 				link_NextPage = Get_LinkNextPage(html)
@@ -320,7 +332,8 @@ if __name__ == '__main__':
 				continue
 	
 	if driver:	
-		driver.close()	# закрываю браузер если он всё ещё открыт
+		# driver.close()	# закрываю браузер если он всё ещё открыт
+		driver.quit()	# закрываю браузер если он всё ещё открыт
 
 	print('\n\n')
 	print(result_listProxy)
