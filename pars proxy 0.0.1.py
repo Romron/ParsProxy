@@ -53,9 +53,6 @@ listProxyPages = [    				# для тестов
 
 
 
-
-
-
 def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 	'''
 		Функция должна: 
@@ -106,7 +103,7 @@ def Get_HTML(URL,mode=1,IP_proxy='',flag_return_driver=0,driver=False):
 			opts = Options()
 			opts.headless = False
 			opts.add_argument('-width=' + str(r.winfo_screenwidth()/2))		# Устанавливаем ширину окна 
-			opts.add_argument('-height=' + str(r.winfo_screenheight()/1.3))	# Устанавливаем высоту окна
+			opts.add_argument('-height=' + str(r.winfo_screenheight()))	# Устанавливаем высоту окна
 			
 
 			driver = webdriver.Firefox(executable_path=pathDriver,options=opts)	
@@ -201,24 +198,29 @@ def Get_ProxyIP(html):
 
 	return result_listProxy
 
-def Get_LinkNextPage(html):
+def Get_LinkNextPage(html,maxMounth_NextPages=''):
 	''' Найти ссылку на следующую страницу 
 		Вернуть найденную ссылку в формате URLа пригодного для использоваия в Get_HTML()
 	'''
 	
-	# (? pattern = r'href=("(.)*?)">Следующая »</a>')
-	# pattern = r'href="((?:/\w)*\.?/?[/\?][\w]+[/=]\d{1,2})">Следующая »</a>'	#работает
-	# pattern = r'href="((?:/\w)*\.?/?[/\?][\w]+[/=]\d{1,2})">(?:Следующая)|(?:Next) »</a>' #работает только на первом	 
-	# pattern = r'<a href="([\w\d/\?=\.]+)">(?:Следующая)|(?:Next) »</a>'	 
-	pattern = r'"([\w\d/\?=\.]+)">(?=(?:Следующая)|(?:Next) »</a>)'	 
+	# для сайтов:   http://free-proxy.cz/en/    http://www.freeproxylists.net/ru/
+	pattern_1 = r'"([\w\d/\?=\.]+)">(?=(?:Следующая)|(?:Next) »</a>)'	 
+	pattern_2 = r'<b class="b-pager__current">(\d+)</b>'	 
+	
 
-	href_ = re.findall(pattern,html)
-	if len(href_) > 1:
-		link_NextPage = re.sub(r'^[\./en]*','',href_[1])
-	else:
-		print('Следующей страницы НЕТ \n')
-		link_NextPage = None
-	return link_NextPage
+
+	href_ = re.findall(pattern_1,html)
+	if href_:
+		return re.sub(r'^[\./en]*','',href_[1])
+	
+	maxMounth_NextPages = re.findall(pattern_2,html)
+	if maxMounth_NextPages:
+		maxMounth_NextPages = maxMounth_NextPages[0]
+
+
+
+	print('Следующей страницы НЕТ \n')
+	return None
 
 def check_CaptchaPage(html):
 	'''
@@ -318,8 +320,14 @@ if __name__ == '__main__':
 
 				for IP_Port in listProxy:
 					result_listProxy.append(IP_Port)
-				link_NextPage = Get_LinkNextPage(html)
 				
+				try:
+					link_NextPage = Get_LinkNextPage(html,maxMounth_NextPages)
+					maxMounth_NextPages = link_NextPage[1]
+					link_NextPage = link_NextPage[0]					
+				except NameError:
+					link_NextPage = Get_LinkNextPage(html)
+
 				if link_NextPage:			
 					URL_Next_Page = URL + link_NextPage
 
@@ -334,19 +342,22 @@ if __name__ == '__main__':
 				continue
 	
 	if driver:	
-		# driver.close()	# закрываю браузер если он всё ещё открыт
-		driver.quit()	# закрываю браузер если он всё ещё открыт
-
+		pass
+		# Отключил на время проведения тестов
+		# driver.quit()	# закрываю браузер если он всё ещё открыт
 
 	print('\n\n')
 	print(result_listProxy)
 
 #============= Записываем полученные прокси в файл: ============
-pathDir = os.path.dirname(os.path.abspath(__file__)) +  "/Proxylist"		
-if not os.path.exists(pathDir) :
-	os.mkdir(pathDir)
 
-timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
-fileName = pathDir + '/proxylist '+ timePars +' .json'
-with open(fileName, 'w', encoding = 'utf-8') as f:
-	json.dump(result_listProxy, f, indent = 2, ensure_ascii = False)	# json.dump() сама пишит в файл
+# Отключил на время проведения тестов
+
+# pathDir = os.path.dirname(os.path.abspath(__file__)) +  "/Proxylist"		
+# if not os.path.exists(pathDir) :
+# 	os.mkdir(pathDir)
+
+# timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
+# fileName = pathDir + '/proxylist '+ timePars +' .json'
+# with open(fileName, 'w', encoding = 'utf-8') as f:
+# 	json.dump(result_listProxy, f, indent = 2, ensure_ascii = False)	# json.dump() сама пишит в файл

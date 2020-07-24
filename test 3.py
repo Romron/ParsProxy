@@ -19,22 +19,10 @@ opts.add_argument('-height=' + str(r.winfo_screenheight()/1.3))
 driver = webdriver.Firefox(executable_path=pathDriver,options=opts)
 driver.set_window_position(r.winfo_screenwidth()/2, 0)
 
-URL = 'http://free-proxy.cz/en/'
+URL = 'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&amp;p=1'
 
 
 
 
 driver.get(URL)
 
-for x in range(4,15):
-	startElement = driver.find_element_by_xpath("/html/body/div[2]/div[1]/div[1]/ul/li[1]/a")
-	finishElement = driver.find_element_by_css_selector('div.paginator:nth-child(5) > a:nth-child(1' + str(x) + ')')
-	action = ActionChains(driver);
-	action.move_to_element(startElement);
-	time.sleep(2)
-	action.move_to_element(finishElement);
-	time.sleep(2)
-	action.click(finishElement)
-	action.perform();
-	print(x)
-	time.sleep(2)
