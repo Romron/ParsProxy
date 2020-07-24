@@ -351,4 +351,12 @@ if __name__ == '__main__':
 	print('\n\n')
 	print(result_listProxy)
 
+#============= Записываем полученные прокси в файл: ============
+pathDir = os.path.dirname(os.path.abspath(__file__)) +  "/Proxylist"		
+if not os.path.exists(pathDir) :
+	os.mkdir(pathDir)
 
+timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
+fileName = pathDir + '/proxylist '+ timePars +' .json'
+with open(fileName, 'w', encoding = 'utf-8') as f:
+	json.dump(result_listProxy, f, indent = 2, ensure_ascii = False)	# json.dump() сама пишит в файл
