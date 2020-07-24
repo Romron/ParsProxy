@@ -5,9 +5,9 @@ import time
 from selenium.webdriver.common.keys import Keys
 import tkinter                 #  библиотека для графических интерфейсов 
 
-import numpy as np
-import scipy.interpolate as si
-from selenium.webdriver.common.action_chains import ActionChains
+# import numpy as np
+# import scipy.interpolate as si
+# from selenium.webdriver.common.action_chains import ActionChains
 
 
 r = tkinter.Tk()
@@ -19,10 +19,14 @@ opts.add_argument('-height=' + str(r.winfo_screenheight()/1.3))
 driver = webdriver.Firefox(executable_path=pathDriver,options=opts)
 driver.set_window_position(r.winfo_screenwidth()/2, 0)
 
-URL = 'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&amp;p=1'
+URL = 'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&amp;p='
+
+for x in range(1,5):
+	URL_1 = URL + str(x)
+	print(x)
+	driver.get(URL_1)
 
 
 
 
-driver.get(URL)
 

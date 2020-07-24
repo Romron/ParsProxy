@@ -9,23 +9,26 @@ import re
 # (? pattern_2 = r'<b class="b-pager__current">(\d+)</b>')
 
 def f():
-	last_page = 871
-	pattern_2 = r'<b class="b-pager__current">(\d+)</b>'
+	# last_page = 871
+	# pattern_2 = r'<b class="b-pager__current">(\d+)</b>'
 	# pattern_2 = r'<a href="\?perpage=20&amp;p=871"')
 	# pattern_2 = r'<a href="\?perpage=20&amp;p=' + str(last_page) + '"'
 
-	result = re.findall(pattern_2,'<b class="b-pager__current">871</b>')
+	# html = '<b class="b-pager__current">871</b><b class="b-pager__current">222</b>'
 
-	if result:
+	# result = re.findall(pattern_2,html)
+
+	try:
+		result
 		pass
-		# print('result is  TRUE')
-	else:
+		print('result is  TRUE')
+	except:
 		pass
 		print('result is  FALSE')
 
-	print(result)
-	print(result[0])
-	return  result, last_page
+	# print(result)
+	# print(result[0])
+	# return  result, last_page
 
 
 f()

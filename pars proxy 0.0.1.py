@@ -22,7 +22,7 @@ timeout = 5		# время ожидания, в секундах, нажатия 
 pathFile = os.path.dirname(__file__)	
 
 listProxyPagesURLs	 = [
-	'https://htmlweb.ru/analiz/proxy_list.php?perpage=50#%D0%9A%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%20%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8', # нет ссылки "Следующая"
+	'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p=', # нет ссылки "Следующая"
 	# 'https://hidemy.name/ru/proxy-list/',
 	# 'http://foxtools.ru/Proxy',		# нет ссылки "Следующая"
 	# 'https://hidester.com/proxylist/',
@@ -205,18 +205,21 @@ def Get_LinkNextPage(html,maxMounth_NextPages=''):
 	
 	# для сайтов:   http://free-proxy.cz/en/    http://www.freeproxylists.net/ru/
 	pattern_1 = r'"([\w\d/\?=\.]+)">(?=(?:Следующая)|(?:Next) »</a>)'	 
+	# для сайта https://htmlweb.ru/analiz/proxy_list.php?perpage=50#Каталоги прокси
 	pattern_2 = r'<b class="b-pager__current">(\d+)</b>'	 
 	
 
 
 	href_ = re.findall(pattern_1,html)
-	if href_:
-		return re.sub(r'^[\./en]*','',href_[1])
+	if href_:								#  знаит мы на одном из сайтов http://free-proxy.cz/en/    http://www.freeproxylists.net/ru/
+		link_NextPage = re.sub(r'^[\./en]*','',href_[1])
+		return link_NextPage
 	
-	maxMounth_NextPages = re.findall(pattern_2,html)
-	if maxMounth_NextPages:
+	maxMounth_NextPages = re.findall(pattern_2,html)		# ищем максимальное количество следующих страниц
+	if maxMounth_NextPages:			# знаит мы на сайте  https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p=
 		maxMounth_NextPages = maxMounth_NextPages[0]
-
+		link_NextPage = 'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p='
+		return link_NextPage, maxMounth_NextPages
 
 
 	print('Следующей страницы НЕТ \n')
@@ -249,6 +252,7 @@ if __name__ == '__main__':
 
 	driver = False
 	link_NextPage = None
+	numberNext_Page = 1 	# для сайта https://htmlweb.ru/analiz/proxy_list.php
 
 	# for fileName in listProxyPages:
 	for URL in listProxyPagesURLs:
@@ -321,14 +325,24 @@ if __name__ == '__main__':
 				for IP_Port in listProxy:
 					result_listProxy.append(IP_Port)
 				
-				try:
-					link_NextPage = Get_LinkNextPage(html,maxMounth_NextPages)
-					maxMounth_NextPages = link_NextPage[1]
-					link_NextPage = link_NextPage[0]					
-				except NameError:
+				if re.findall(r'htmlweb\.ru',link_NextPage):		# в єтом блоке обрабатіваеться сайт htmlweb\.ru
+					try:
+						maxMounth_NextPages
+						link_NextPage = Get_LinkNextPage(html,maxMounth_NextPages)		
+						while numberNext_Page < dict_NextPage[1]:		# dict_NextPage[1] == maxMounth_NextPages
+
+
+							numberNext_Page += 1
+					except NameError: 		# если  maxMounth_NextPages не существует то это первый вызов дляэтого сайта
+							dict_NextPage = Get_LinkNextPage(html)
+							maxMounth_NextPages = dict_NextPage[1]	# получаю максимальное количествостраниц на том сайте
+							numberNext_Page += 1			# т.к. numberNext_Page изначально равен 1
+							link_NextPage = link_NextPage + str(numberNext_Page)	# формирую URL второй(!) страницы
+
+
 					link_NextPage = Get_LinkNextPage(html)
 
-				if link_NextPage:			
+				if link_NextPage:	!!!!!!!!!!!!!!!!!!!!!		
 					URL_Next_Page = URL + link_NextPage
 
 					print('\n' + URL_Next_Page)
