@@ -34,7 +34,6 @@ import re
 # f()
 
 
-
 	
 
 
@@ -62,6 +61,3 @@ import re
 
 	print('Следующей страницы НЕТ \n')
 	return None
-
-
-

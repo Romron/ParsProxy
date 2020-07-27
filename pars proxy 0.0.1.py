@@ -204,13 +204,13 @@ def Get_LinkNextPage(html,URL):
 	'''
 	
 	# для сайта:   http://free-proxy.cz/en/ 
-	patern_1,html = 
+	patern_1 = r'"([\w\d/\?=\.]+)">Next »</a>'
 	
 	# для сайта:   http://www.freeproxylists.net/ru/
-	patern_2,html = 
+	patern_2 = r'"\.([\w\d/\?=]+)">Следующая »</a>' 
 
 	# для сайта:   https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p=
-	patern_3,html = 
+	patern_3,html = r'<b class="b-pager__current">(\d+)</b>'	# эта ссылка естьтолько на первой странице !!
 	
 	# для сайта:   'https://hidemy.name/ru/proxy-list/'
 	patern_4,html = 
@@ -222,17 +222,31 @@ def Get_LinkNextPage(html,URL):
 	patern_6,html = 
 	
 
-
-
-
-
 	if re.search(r'free-proxy\.cz',URL):
-
+		href_ = re.findall(patern_1,html)
+		link_NextPage = re.sub(r'^[\./en]','',href_[1])
+		URL_NextPage = URL + link_NextPage
 
 	elif re.search(r'freeproxylists\.net',URL):
-	
+		result = re.findall(patern_1,html)
+		link_NextPage = re.sub(r'^[\./en]','',result[1])
+		URL_NextPage = URL + link_NextPage
 
 	elif re.search(r'htmlweb\.ru',URL):
+		result_3 = re.findall(pattern_3,html)		# ищем максимальное количество следующих страниц
+		maxMounth_NextPages = result_3[0]
+		return maxMounth_NextPages 
+
+
+	elif re.search(r'hidemy.name',URL):
+
+
+	elif re.search(r'foxtools.ru',URL):
+
+
+	elif re.search(r'hidester.com',URL):
+
+
 
 	else:
 		URL_NextPage == FALSE
@@ -344,24 +358,21 @@ if __name__ == '__main__':
 				for IP_Port in listProxy:
 					result_listProxy.append(IP_Port)
 				
-				print('URL_Next_Page = ', URL_Next_Page)
-				if re.findall(r'htmlweb\.ru',URL_Next_Page):		# в этом блоке обрабатываеться сайт htmlweb\.ru
+				# ищу ссылку на следующую страницу
+
+	??			if re.findall(r'htmlweb\.ru',URL_Next_Page):		# в этом блоке обрабатываеться сайт htmlweb\.ru
 					try:
 						maxMounth_NextPages
-						link_NextPage = Get_LinkNextPage(html)		
-						while numberNext_Page < dict_NextPage[1]:		# dict_NextPage[1] == maxMounth_NextPages
-							URL_Next_Page = link_NextPage + str(numberNext_Page)	# формирую URL второй(!) страницы
-
+						if numberNext_Page < maxMounth_NextPages:		
+							URL_Next_Page = URL + str(numberNext_Page)	# т.к. URL_Next_Page уже содержитцыфру в конце, a URL нет
 							numberNext_Page += 1
 					except NameError: 		# если  maxMounth_NextPages не существует то это первый вызов для этого сайта
-							dict_NextPage = Get_LinkNextPage(html)
-							link_NextPage = dict_NextPage[0]
-							maxMounth_NextPages = dict_NextPage[1]	# получаю максимальное количествостраниц на том сайте
 							numberNext_Page += 1			# т.к. numberNext_Page изначально равен 1
-							URL_Next_Page = link_NextPage + str(numberNext_Page)	# формирую URL второй(!) страницы
+							maxMounth_NextPages = Get_LinkNextPage(html)
+							URL_Next_Page = URL_Next_Page + str(numberNext_Page)	# формирую URL второй(!) страницы
 
 
-				else: 		# в этом блоке обрабатываеться сайты http://www.freeproxylists.net/ru/ и http://free-proxy.cz/en/
+	??			elif (re.search(r'free-proxy\.cz',URL) or re.search(r'freeproxylists\.net',URL)) : 		# в этом блоке обрабатываеться сайты http://www.freeproxylists.net/ru/ и http://free-proxy.cz/en/
 					link_NextPage = Get_LinkNextPage(html)	
 
 					if link_NextPage:			
@@ -369,9 +380,9 @@ if __name__ == '__main__':
 
 						print('\n' + URL_Next_Page)
 
-					else:
-						flag_page_enumeration = 0
-						# driver.close()	# закрываю браузер
+				else:
+					flag_page_enumeration = 0	# эта строка прекращает обработку текущего URLа
+					# driver.close()	# закрываю браузер
 
 			else:
 
