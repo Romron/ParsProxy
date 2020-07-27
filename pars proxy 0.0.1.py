@@ -198,36 +198,44 @@ def Get_ProxyIP(html):
 
 	return result_listProxy
 
-def Get_LinkNextPage(html):
+def Get_LinkNextPage(html,URL):
 	''' Найти ссылку на следующую страницу 
 		Вернуть найденную ссылку в формате URLа пригодного для использоваия в Get_HTML()
 	'''
 	
-	# для сайтов:   http://free-proxy.cz/en/    http://www.freeproxylists.net/ru/
-	pattern_1 = r'"([\w\d/\?=\.]+)">(?=(?:Следующая)|(?:Next) »</a>)'	 
-	# для сайта https://htmlweb.ru/analiz/proxy_list.php?perpage=50#Каталоги прокси
-!!!!	pattern_2 = r'<b class="b-pager__current">(\d+)</b>'	# эта ссылка естьтолько на первой странице !!
+	# для сайта:   http://free-proxy.cz/en/ 
+	patern_1,html = 
+	
+	# для сайта:   http://www.freeproxylists.net/ru/
+	patern_2,html = 
+	
 	
 
-
-	href_ = re.findall(pattern_1,html)
-	if href_:								#  значит мы на одном из сайтов http://free-proxy.cz/en/    http://www.freeproxylists.net/ru/
-		link_NextPage = re.sub(r'^[\./en]*','',href_[1])
-		return link_NextPage
+	# для сайта:   https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p=
+	patern_3,html = 
 	
-	maxMounth_NextPages = re.findall(pattern_2,html)		# ищем максимальное количество следующих страниц
-	if maxMounth_NextPages:			# значит мы на сайте  https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p=
-		maxMounth_NextPages = maxMounth_NextPages[0]
-		link_NextPage = 'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p='
-		return link_NextPage, maxMounth_NextPages
+
+	if re.search(r'free-proxy\.cz',URL):
 
 
-	print('Следующей страницы НЕТ \n')
-	return None
+	elif re.search(r'freeproxylists\.net',URL):
+	
+
+	elif re.search(r'htmlweb\.ru',URL):
+
+	else:
+		URL_NextPage == FALSE
+		print('Нет шаблона для обработки этого URLa  ',URL)
+
+	return URL_NextPage
+
 
 def check_CaptchaPage(html):
 	'''
-		TODO: добавить патерны для разных страниц блокировки
+		TODO: 
+			добавить патерны для разных страниц блокировки
+			привести в соответствие с дракон схемой
+
 
 	'''
 
