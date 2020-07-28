@@ -216,6 +216,7 @@ def Get_LinkNextPage(html,URL):
 	# для сайта:   'https://hidester.com/proxylist/'
 	# patern_6,html = 
 	
+	URL_NextPage = ''		# для тех случаев когда следующей страницы нет
 
 	if re.search(r'free-proxy\.cz',URL):
 		href_ = re.findall(patern_1,html)
