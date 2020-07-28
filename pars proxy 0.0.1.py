@@ -22,12 +22,12 @@ timeout = 5		# время ожидания, в секундах, нажатия 
 pathFile = os.path.dirname(__file__)	
 
 listProxyPagesURLs	 = [
-	'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p=', # нет ссылки "Следующая"
+	'http://free-proxy.cz/en/',						# по этому URLу всё работает но только 5 страниц дальше без каптчи не пускает!
+	'http://www.freeproxylists.net/ru/',			    # по этому URLу всё работает но сам сайт блокируеться по IP изначально!
+	'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p=', # по этому URLу всё работает
 	# 'https://hidemy.name/ru/proxy-list/',
 	# 'http://foxtools.ru/Proxy',		# нет ссылки "Следующая"
 	# 'https://hidester.com/proxylist/',
-	# 'http://free-proxy.cz/en/',						# по этому URLу всё работает но только 5 страниц дальше без каптчи не пускает!
-	# 'http://www.freeproxylists.net/ru/',			    # по этому URLу всё работает но сам сайт блокируеться по IP изначально!
 	]
 
 listProxyPages = [    				# для тестов
@@ -219,13 +219,17 @@ def Get_LinkNextPage(html,URL):
 
 	if re.search(r'free-proxy\.cz',URL):
 		href_ = re.findall(patern_1,html)
-		link_NextPage = re.sub(r'^[\./en]','',href_[1])
-		URL_NextPage = URL + link_NextPage
-
+		if href_:
+			link_NextPage = re.sub(r'^/en','',href_[0])
+			URL_NextPage = URL + link_NextPage
+		else:
+			URL_NextPage == FALSE
 	elif re.search(r'freeproxylists\.net',URL):
-		result = re.findall(patern_1,html)
-		link_NextPage = re.sub(r'^[\./en]','',result[1])
-		URL_NextPage = URL + link_NextPage
+		link_NextPage = re.findall(patern_2,html)
+		if link_NextPage:
+			URL_NextPage = URL + link_NextPage[0]
+		else:
+			URL_NextPage == False   # т.е. следующей страницы на этом сайте нет!
 
 	elif re.search(r'htmlweb\.ru',URL):
 		result_3 = re.findall(patern_3,html)		# ищем максимальное количество следующих страниц
@@ -258,14 +262,16 @@ def check_CaptchaPage(html):
 
 
 	'''
+	
+	patern_1 = r'complete CAPTCHA to continue'	# для сайтов:   http://free-proxy.cz/en/  и  http://www.freeproxylists.net/ru/
+	
+	patern_2 = r'class="g-recaptcha-bubble-arrow"'	# для сайта:   https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p=	
 
-	try: 
-		if re.search('complete CAPTCHA to continue',html): 
-			return 'CAPTCHA'
-		# elif re.search('',html):
-		# 	return 'CAPTCHA'
-
-	except:
+	if re.search(patern_1,html): 
+		return 'CAPTCHA'
+	elif re.search(patern_2,html): 
+		return 'CAPTCHA'
+	else:
 		print('check_CaptchaPage(): Блокировки сайта не найдено')
 
 	return True
@@ -279,7 +285,7 @@ def check_CaptchaPage(html):
 if __name__ == '__main__':		
 
 	driver = False
-	URL_Next_Page = None
+	URL_NextPage = None
 	numberNext_Page = 1 	# для сайта https://htmlweb.ru/analiz/proxy_list.php
 
 	# for fileName in listProxyPages:
@@ -290,7 +296,6 @@ if __name__ == '__main__':
 		IP_proxy = ''
 
 		print(URL)
-		print('print(URL) maxMounth_NextPages = ' + str(URL_Next_Page))
 		# print(fileName)
 		
 		while flag_page_enumeration:			# цикл продолжается пока есть ссылка на сл. страницу
@@ -299,10 +304,10 @@ if __name__ == '__main__':
 			# 	html = file_handler.read()
 			# 	flag_page_enumeration = 0
 
-			if not URL_Next_Page:
-				URL_Next_Page = URL
+			if not URL_NextPage:
+				URL_NextPage = URL
 
-			arr_result = Get_HTML(URL_Next_Page,1,IP_proxy,1,driver)	# функция возвратит arr_result[html,driver]
+			arr_result = Get_HTML(URL_NextPage,1,IP_proxy,1,driver)	# функция возвратит arr_result[html,driver]
 			if type(arr_result) == bool:
 				html = arr_result
 			elif type(arr_result) == list:
@@ -314,7 +319,7 @@ if __name__ == '__main__':
 
 			if check_CaptchaPage(html) == 'CAPTCHA' or html == False:
 				try:			# если result_listProxy нет 
-					if re.search('http://free-proxy.cz/en',URL_Next_Page):
+					if re.search('http://free-proxy.cz/en',URL_NextPage):
 						raise NameError			# генерирую исключение т.к. этот сайт не пускает дальше 5 страницы без каптчи
 					if len(result_listProxy) == 0:   # если result_listProxy есть, но он равен нулю
 						raise NameError			# генерирую исключение
@@ -345,7 +350,7 @@ if __name__ == '__main__':
 				except NameError:
 					print('Сайт заблокирован, списка прокси нет')
 					html = False
-					link_NextPage = ''	# для того чтобы на следующей итерации цыкла for обрабатывался именно новый URL а не значение link_NextPage из текущей итерации
+					URL_NextPage = ''	# для того чтобы на следующей итерации цыкла for обрабатывался именно новый URL а не значение link_NextPage из текущей итерации
 					break 				# эта строка должна закончить оброботку текущего URLа и переходить к следующему 
 
 			if html:
@@ -358,49 +363,50 @@ if __name__ == '__main__':
 				
 				# ищу ссылку на следующую страницу
 
-				if re.findall(r'htmlweb\.ru',URL_Next_Page):		# в этом блоке обрабатываеться сайт htmlweb\.ru
+				if re.findall(r'htmlweb\.ru',URL_NextPage):		# в этом блоке обрабатываеться сайт htmlweb\.ru
 					try:
 						if numberNext_Page < maxMounth_NextPages:
-							URL_Next_Page = URL + str(numberNext_Page)	# т.к. URL_Next_Page уже содержитцыфру в конце, a URL нет
+							URL_NextPage = URL + str(numberNext_Page)	# т.к. URL_NextPage уже содержитцыфру в конце, a URL нет
 							numberNext_Page += 1
 							
-							print('\ntry:' + URL_Next_Page)
+							print('\ntry:' + URL_NextPage)
 							print('\nmaxMounth_NextPages = ' + str(maxMounth_NextPages))
 
 						else:
 							print('\nELSE   maxMounth_NextPages = ' + str(maxMounth_NextPages))
 							
 							flag_page_enumeration = 0	# эта строка прекращает обработку текущего URLа
-							URL_Next_Page = 0
+							URL_NextPage = 0
 					except NameError: 		# если  maxMounth_NextPages не существует то это первый вызов для этого сайта
 						numberNext_Page += 1			# т.к. numberNext_Page изначально равен 1
 						maxMounth_NextPages = Get_LinkNextPage(html,URL)
-						URL_Next_Page = URL_Next_Page + str(numberNext_Page)	# формирую URL второй(!) страницы
+						URL_NextPage = URL_NextPage + str(numberNext_Page)	# формирую URL второй(!) страницы
 						
-						print('\nexcept NameError' + URL_Next_Page)
+						print('\nexcept NameError' + URL_NextPage)
 						print('maxMounth_NextPages = ' + str(maxMounth_NextPages))
 
 
 
 				elif (re.search(r'free-proxy\.cz',URL) or re.search(r'freeproxylists\.net',URL)) : 		# в этом блоке обрабатываеться сайты http://www.freeproxylists.net/ru/ и http://free-proxy.cz/en/
-					link_NextPage = Get_LinkNextPage(html)	
+					link_NextPage = Get_LinkNextPage(html,URL)	
 
 					if link_NextPage:			
-						URL_Next_Page = URL + link_NextPage
-						print('\n' + URL_Next_Page)
+						URL_NextPage = link_NextPage
+						print('\n' + URL_NextPage)
 					else:
 						flag_page_enumeration  = 0	# эта строка прекращает обработку текущего URLа
-						URL_Next_Page = 0
+						URL_NextPage = 0
 				else:
 					flag_page_enumeration = 0	# эта строка прекращает обработку текущего URLа
-					URL_Next_Page = 0
+					URL_NextPage = 0
 			else:
 
 				continue
 	
 	if driver:	
 		pass
-		driver.quit()	# закрываю браузер если он всё ещё открыт
+		# закрыл для тестов
+		# driver.quit()	# закрываю браузер если он всё ещё открыт
 
 	print('\n\n')
 	print(result_listProxy)

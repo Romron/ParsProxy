@@ -2,7 +2,7 @@ import os
 import re
 
 
-f = open('pages/htmlweb.ru.html','r',encoding="utf-8")
+f = open('pages/freeproxylists.net.html','r',encoding="utf-8")
 html = f.read()
 
 # html = '<a href="?perpage=20&amp;p=1027" rel="last" title="в конец" onclick="return LoadMain(event);"> 1027 </a>'
