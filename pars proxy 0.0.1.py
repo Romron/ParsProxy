@@ -205,21 +205,16 @@ def Get_LinkNextPage(html,URL):
 	
 	# для сайта:   http://free-proxy.cz/en/ 
 	patern_1 = r'"([\w\d/\?=\.]+)">Next »</a>'
-	
 	# для сайта:   http://www.freeproxylists.net/ru/
 	patern_2 = r'"\.([\w\d/\?=]+)">Следующая »</a>' 
-
 	# для сайта:   https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p=
-	patern_3,html = r'<b class="b-pager__current">(\d+)</b>'	# эта ссылка естьтолько на первой странице !!
-	
+	patern_3 = r'title="в конец" [\w =";()]+> ?([0-9]+) ?</a>'	# эта ссылка естьтолько на первой странице !!
 	# для сайта:   'https://hidemy.name/ru/proxy-list/'
-	patern_4,html = 
-	
+	# patern_4,html = 
 	# для сайта:   'http://foxtools.ru/Proxy'
-	patern_5,html = 
-	
+	# patern_5,html = 
 	# для сайта:   'https://hidester.com/proxylist/'
-	patern_6,html = 
+	# patern_6,html = 
 	
 
 	if re.search(r'free-proxy\.cz',URL):
@@ -233,19 +228,19 @@ def Get_LinkNextPage(html,URL):
 		URL_NextPage = URL + link_NextPage
 
 	elif re.search(r'htmlweb\.ru',URL):
-		result_3 = re.findall(pattern_3,html)		# ищем максимальное количество следующих страниц
+		result_3 = re.findall(patern_3,html)		# ищем максимальное количество следующих страниц
 		maxMounth_NextPages = result_3[0]
-		return maxMounth_NextPages 
+		return int(maxMounth_NextPages) 
 
 
-	elif re.search(r'hidemy.name',URL):
+	elif re.search(r'hidemy\.name',URL):
+		print('hidemy.name')
 
+	elif re.search(r'foxtools\.ru',URL):
+		print('foxtools.ru')
 
-	elif re.search(r'foxtools.ru',URL):
-
-
-	elif re.search(r'hidester.com',URL):
-
+	elif re.search(r'hidester\.com',URL):
+		print('hidester.com')
 
 
 	else:
@@ -284,7 +279,7 @@ def check_CaptchaPage(html):
 if __name__ == '__main__':		
 
 	driver = False
-	link_NextPage = None
+	URL_Next_Page = None
 	numberNext_Page = 1 	# для сайта https://htmlweb.ru/analiz/proxy_list.php
 
 	# for fileName in listProxyPages:
@@ -295,6 +290,7 @@ if __name__ == '__main__':
 		IP_proxy = ''
 
 		print(URL)
+		print('print(URL) maxMounth_NextPages = ' + str(URL_Next_Page))
 		# print(fileName)
 		
 		while flag_page_enumeration:			# цикл продолжается пока есть ссылка на сл. страницу
@@ -303,7 +299,7 @@ if __name__ == '__main__':
 			# 	html = file_handler.read()
 			# 	flag_page_enumeration = 0
 
-			if not link_NextPage:
+			if not URL_Next_Page:
 				URL_Next_Page = URL
 
 			arr_result = Get_HTML(URL_Next_Page,1,IP_proxy,1,driver)	# функция возвратит arr_result[html,driver]
@@ -342,6 +338,8 @@ if __name__ == '__main__':
 							time2 = time.time()
 					if count_ProxyIP == False:	
 						break
+					
+					# здесь по идее нужно закрывать браузер
 					continue # эта строка должна вернуть прогамму к обработке тогоже URLа но сдругим IP
 			
 				except NameError:
@@ -360,51 +358,60 @@ if __name__ == '__main__':
 				
 				# ищу ссылку на следующую страницу
 
-	??			if re.findall(r'htmlweb\.ru',URL_Next_Page):		# в этом блоке обрабатываеться сайт htmlweb\.ru
+				if re.findall(r'htmlweb\.ru',URL_Next_Page):		# в этом блоке обрабатываеться сайт htmlweb\.ru
 					try:
-						maxMounth_NextPages
-						if numberNext_Page < maxMounth_NextPages:		
+						if numberNext_Page < maxMounth_NextPages:
 							URL_Next_Page = URL + str(numberNext_Page)	# т.к. URL_Next_Page уже содержитцыфру в конце, a URL нет
 							numberNext_Page += 1
+							
+							print('\ntry:' + URL_Next_Page)
+							print('\nmaxMounth_NextPages = ' + str(maxMounth_NextPages))
+
+						else:
+							print('\nELSE   maxMounth_NextPages = ' + str(maxMounth_NextPages))
+							
+							flag_page_enumeration = 0	# эта строка прекращает обработку текущего URLа
+							URL_Next_Page = 0
 					except NameError: 		# если  maxMounth_NextPages не существует то это первый вызов для этого сайта
-							numberNext_Page += 1			# т.к. numberNext_Page изначально равен 1
-							maxMounth_NextPages = Get_LinkNextPage(html)
-							URL_Next_Page = URL_Next_Page + str(numberNext_Page)	# формирую URL второй(!) страницы
+						numberNext_Page += 1			# т.к. numberNext_Page изначально равен 1
+						maxMounth_NextPages = Get_LinkNextPage(html,URL)
+						URL_Next_Page = URL_Next_Page + str(numberNext_Page)	# формирую URL второй(!) страницы
+						
+						print('\nexcept NameError' + URL_Next_Page)
+						print('maxMounth_NextPages = ' + str(maxMounth_NextPages))
 
 
-	??			elif (re.search(r'free-proxy\.cz',URL) or re.search(r'freeproxylists\.net',URL)) : 		# в этом блоке обрабатываеться сайты http://www.freeproxylists.net/ru/ и http://free-proxy.cz/en/
+
+				elif (re.search(r'free-proxy\.cz',URL) or re.search(r'freeproxylists\.net',URL)) : 		# в этом блоке обрабатываеться сайты http://www.freeproxylists.net/ru/ и http://free-proxy.cz/en/
 					link_NextPage = Get_LinkNextPage(html)	
 
 					if link_NextPage:			
 						URL_Next_Page = URL + link_NextPage
-
 						print('\n' + URL_Next_Page)
-
+					else:
+						flag_page_enumeration  = 0	# эта строка прекращает обработку текущего URLа
+						URL_Next_Page = 0
 				else:
 					flag_page_enumeration = 0	# эта строка прекращает обработку текущего URLа
-					# driver.close()	# закрываю браузер
-
+					URL_Next_Page = 0
 			else:
 
 				continue
 	
 	if driver:	
 		pass
-		# Отключил на время проведения тестов
-		# driver.quit()	# закрываю браузер если он всё ещё открыт
+		driver.quit()	# закрываю браузер если он всё ещё открыт
 
 	print('\n\n')
 	print(result_listProxy)
 
 #============= Записываем полученные прокси в файл: ============
 
-# Отключил на время проведения тестов
+pathDir = os.path.dirname(os.path.abspath(__file__)) +  "/Proxylist"		
+if not os.path.exists(pathDir) :
+	os.mkdir(pathDir)
 
-# pathDir = os.path.dirname(os.path.abspath(__file__)) +  "/Proxylist"		
-# if not os.path.exists(pathDir) :
-# 	os.mkdir(pathDir)
-
-# timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
-# fileName = pathDir + '/proxylist '+ timePars +' .json'
-# with open(fileName, 'w', encoding = 'utf-8') as f:
-# 	json.dump(result_listProxy, f, indent = 2, ensure_ascii = False)	# json.dump() сама пишит в файл
+timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
+fileName = pathDir + '/proxylist '+ timePars +' .json'
+with open(fileName, 'w', encoding = 'utf-8') as f:
+	json.dump(result_listProxy, f, indent = 2, ensure_ascii = False)	# json.dump() сама пишит в файл

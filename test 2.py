@@ -2,21 +2,18 @@ import os
 import re
 
 
-f = open('pages/freeproxylists.net.html','r',encoding="utf-8")
+f = open('pages/htmlweb.ru.html','r',encoding="utf-8")
 html = f.read()
 
-URL = 'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&p='
-#      http://www.freeproxylists.net/ru/?page=2
-
-# <a href="./?page=3">Следующая »</a>
+# html = '<a href="?perpage=20&amp;p=1027" rel="last" title="в конец" onclick="return LoadMain(event);"> 1027 </a>'
 
 
-patern_2 = r'"\.([\w\d/\?=]+)">Следующая »</a>'
+# patern_1 = r'<b class="b-pager__current">(\d+)</b>'
+patern_1 = r'title="в конец" [\w =";()]+> ?([0-9]+) ?</a>'
+
 result = re.findall(patern_1,html)
-link_NextPage = re.sub(r'^[\./en]','',result[1])
-URL_NextPage = URL + link_NextPage
-print(link_NextPage)
-print(URL_NextPage)
+
+print(result)
 
 
 # URL = 'http://free-proxy.cz/en/'
