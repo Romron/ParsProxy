@@ -5,29 +5,102 @@ import re
 import time
 from selenium.webdriver.common.keys import Keys
 import tkinter                 #  библиотека для графических интерфейсов 
+import json
+
 
 # import numpy as np
 # import scipy.interpolate as si
 # from selenium.webdriver.common.action_chains import ActionChains
 
 
-# r = tkinter.Tk()
-# pathDriver = os.path.dirname(os.path.abspath(__file__)) + "/geckodriver.exe"
-# opts = Options()
-# opts.add_argument('-width=' + str(r.winfo_screenwidth()/2))
-# opts.add_argument('-height=' + str(r.winfo_screenheight()/1.3))
+list_1 = [
+	'213.166.76.189:8085',
+	'103.140.109.123:8080',
+	'23.236.186.187:80',
+	'202.144.201.164:43870',
+	'195.60.174.123:39635',
+	'31.40.253.127:8085',
+	'180.183.13.154:8080',
+	'213.166.77.133:8085',
+	'188.129.161.55:51309',
+	'212.227.164.87:80',
+	'103.105.40.153:16538',
+	'182.253.86.102:8080',
+	'193.56.64.127:8085',
+	'181.191.106.122:43716',
+	'64.71.145.122:3128',
+	'37.97.190.117:5836',
+	'36.68.143.197:8080',
+	'84.201.170.136:8080',
+	'207.63.63.231:8080',
+	'203.202.245.211:43421'
+	]
 
-# driver = webdriver.Firefox(executable_path=pathDriver,options=opts)
-# driver.set_window_position(r.winfo_screenwidth()/2, 0)
+list_2 = [
+	'307.306.465.318:7058',
+	'12.156.45.155:3128',
+	'24.138.16.16:3128',
+	'105.112.8.53:3128',
+	'213.166.76.248:8085',
+	'24.172.34.114:44293',
+	'91.188.246.70:8085',
+	'95.143.135.51:4145',
+	'181.114.224.197:8080',
+	'93.177.116.195:8085',
+	'177.29.66.49:8080',
+	'178.130.115.101:8080',
+	'36.89.229.97:59707',
+	'134.35.196.17:8080',
+	'23.236.200.85:80',
+	'178.134.208.126:50824',
+	'2.57.78.155:8085',
+	'36.67.24.109:31255',
+	'176.30.210.84:8080',
+	'185.20.198.108:8080'
+	]
 
-URL = 'https://htmlweb.ru/analiz/proxy_list.php?perpage=20&amp;p='
-# driver.get(URL)
+list_3 = [
+	'46.250.171.31:8080',
+	'93.177.116.151:8085',
+	'78.47.16.54:80',
+	'187.130.139.197:8080',
+	'114.98.27.145:3000',
+	'31.28.241.117:4145',
+	'123.207.91.165:1080',
+	'190.53.46.14:38525',
+	'14.38.255.11:80',
+	'103.133.204.169:8080',
+	'144.217.101.245:3129',
+	'103.137.218.1:82',
+	'194.126.25.28:43856',
+	'173.82.17.190:5836',
+	'212.114.191.126:80',
+	'203.158.167.25:8080',
+	'51.15.188.113:5836',
+	'213.166.78.180:8085',
+	'176.123.164.240:58488',
+	'124.158.88.56:49224'
+	]
 
-result = re.findall(r'htmlweb\.ru',URL):
-print(result)
+dirName = 'test_JSON'
+fileName = 'test'
 
 
+if dirName:
+	dirName =  "/" + dirName
+pathDir = os.path.dirname(os.path.abspath(__file__)) + dirName		
+if not os.path.exists(pathDir) :
+	os.mkdir(pathDir)
 
+timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
+if fileName:
+	fileName =  "/" + fileName
+
+pathName = pathDir + fileName + timePars +' .json'
+with open(pathName, 'w', encoding = 'utf-8') as f:
+	for x in list_1:
+		json_string = json.dumps(x)
+		json.dump(json_string, f, indent = 2, sort_keys=True, ensure_ascii = False)
 
 
 

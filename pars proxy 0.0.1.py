@@ -361,14 +361,15 @@ if __name__ == '__main__':
 
 				for IP_Port in listProxy:
 					result_listProxy.append(IP_Port)
+					# save_toFile(IP_Port)		# запись в файл реализовать построчную запись
 				
 				# ищу ссылку на следующую страницу
 
 				if re.findall(r'htmlweb\.ru',URL_NextPage):		# в этом блоке обрабатываеться сайт htmlweb\.ru
 					try:
 						if numberNext_Page < maxMounth_NextPages:
-							URL_NextPage = URL + str(numberNext_Page)	# т.к. URL_NextPage уже содержитцыфру в конце, a URL нет
 							numberNext_Page += 1
+							URL_NextPage = URL + str(numberNext_Page)	# т.к. URL_NextPage уже содержит цыфру в конце, a URL нет
 							
 							print('\ntry:' + URL_NextPage)
 							print('\nmaxMounth_NextPages = ' + str(maxMounth_NextPages))
@@ -406,8 +407,7 @@ if __name__ == '__main__':
 	
 	if driver:	
 		pass
-		# закрыл для тестов
-		# driver.quit()	# закрываю браузер если он всё ещё открыт
+		driver.quit()	# закрываю браузер если он всё ещё открыт
 
 	print('\n\n')
 	print(result_listProxy)
