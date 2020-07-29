@@ -289,6 +289,10 @@ if __name__ == '__main__':
 	URL_NextPage = None
 	numberNext_Page = 1 	# для сайта https://htmlweb.ru/analiz/proxy_list.php
 
+	time_Start = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
+	print(time_Start)
+
+
 	# for fileName in listProxyPages:
 	for URL in listProxyPagesURLs:
 		
@@ -344,10 +348,8 @@ if __name__ == '__main__':
 							time2 = time.time()
 					if count_ProxyIP == False:	
 						break
-					
 					# здесь по идее нужно закрывать браузер
 					continue # эта строка должна вернуть прогамму к обработке тогоже URLа но сдругим IP
-			
 				except NameError:
 					print('Сайт заблокирован, списка прокси нет')
 					html = False
@@ -356,39 +358,25 @@ if __name__ == '__main__':
 
 			if html:
 				listProxy = Get_ProxyIP(html)
-				
 				print(listProxy)		# для тестов
-
 				for IP_Port in listProxy:
 					result_listProxy.append(IP_Port)
-					# save_toFile(IP_Port)		# запись в файл реализовать построчную запись
+					
+					# save_toFile(IP_Port)		# запись в файл. Реализовать построчную запись
 				
-				# ищу ссылку на следующую страницу
-
+				# ======================================   поиск ссылки на следующую страницу  ========================================================
 				if re.findall(r'htmlweb\.ru',URL_NextPage):		# в этом блоке обрабатываеться сайт htmlweb\.ru
 					try:
 						if numberNext_Page < maxMounth_NextPages:
 							numberNext_Page += 1
 							URL_NextPage = URL + str(numberNext_Page)	# т.к. URL_NextPage уже содержит цыфру в конце, a URL нет
-							
-							print('\ntry:' + URL_NextPage)
-							print('\nmaxMounth_NextPages = ' + str(maxMounth_NextPages))
-
 						else:
-							print('\nELSE   maxMounth_NextPages = ' + str(maxMounth_NextPages))
-							
 							flag_page_enumeration = 0	# эта строка прекращает обработку текущего URLа
 							URL_NextPage = 0
 					except NameError: 		# если  maxMounth_NextPages не существует то это первый вызов для этого сайта
 						numberNext_Page += 1			# т.к. numberNext_Page изначально равен 1
 						maxMounth_NextPages = Get_LinkNextPage(html,URL)
 						URL_NextPage = URL_NextPage + str(numberNext_Page)	# формирую URL второй(!) страницы
-						
-						print('\nexcept NameError' + URL_NextPage)
-						print('maxMounth_NextPages = ' + str(maxMounth_NextPages))
-
-
-
 				elif (re.search(r'free-proxy\.cz',URL) or re.search(r'freeproxylists\.net',URL)) : 		# в этом блоке обрабатываеться сайты http://www.freeproxylists.net/ru/ и http://free-proxy.cz/en/
 					link_NextPage = Get_LinkNextPage(html,URL)	
 
@@ -422,3 +410,6 @@ timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
 fileName = pathDir + '/proxylist '+ timePars +' .json'
 with open(fileName, 'w', encoding = 'utf-8') as f:
 	json.dump(result_listProxy, f, indent = 2, ensure_ascii = False)	# json.dump() сама пишит в файл
+
+time_Finish = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
+print(time_Finish)
