@@ -254,7 +254,6 @@ def Get_LinkNextPage(html,URL):
 
 	return URL_NextPage
 
-
 def check_CaptchaPage(html):
 	'''
 		TODO: 
@@ -276,6 +275,32 @@ def check_CaptchaPage(html):
 		print('check_CaptchaPage(): Блокировки сайта не найдено')
 
 	return True
+
+def save_Result(dict_,path='',mode=0):
+	'''
+		запись  и ДОзапись полученых данных в файл в формате json
+		path обязательно должен содержать имя файла
+	'''
+	timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
+
+	if path:
+		arr_path = re.split(r'[/\\\\]',path)
+		fileName = arr_path[len(arr_path)-1]
+		dirName = arr_path[len(arr_path)-2]	
+		pathDir = os.path.dirname(os.path.abspath(__file__)) + dirName		
+		if not os.path.exists(pathDir) :
+			os.mkdir(pathDir)
+		path_ToFile = path
+	else:
+		path_ToFile = timeStart +' .json'
+
+	# ЗАПИСЬ даннных в файл
+	with open(path_ToFile, 'w', encoding = 'utf-8') as file_handle:
+		file_handle.write('-=TEST-=-TEST-=-TEST-=-TEST-=-TEST-=-TEST=-')
+
+	# ДОзапись даннных в файл
+	***************************************
+
 
 
 
@@ -370,24 +395,14 @@ if __name__ == '__main__':
 						if numberNext_Page < maxMounth_NextPages:
 							numberNext_Page += 1
 							URL_NextPage = URL + str(numberNext_Page)	# т.к. URL_NextPage уже содержит цыфру в конце, a URL нет
-							
-							print('\ntry:' + URL_NextPage)
-							print('\nmaxMounth_NextPages = ' + str(maxMounth_NextPages))
-
+							print('\n' + URL_NextPage)
 						else:
-							print('\nELSE   maxMounth_NextPages = ' + str(maxMounth_NextPages))
-							
 							flag_page_enumeration = 0	# эта строка прекращает обработку текущего URLа
 							URL_NextPage = 0
 					except NameError: 		# если  maxMounth_NextPages не существует то это первый вызов для этого сайта
 						numberNext_Page += 1			# т.к. numberNext_Page изначально равен 1
 						maxMounth_NextPages = Get_LinkNextPage(html,URL)
 						URL_NextPage = URL_NextPage + str(numberNext_Page)	# формирую URL второй(!) страницы
-						
-						print('\nexcept NameError' + URL_NextPage)
-						print('maxMounth_NextPages = ' + str(maxMounth_NextPages))
-
-
 
 				elif (re.search(r'free-proxy\.cz',URL) or re.search(r'freeproxylists\.net',URL)) : 		# в этом блоке обрабатываеться сайты http://www.freeproxylists.net/ru/ и http://free-proxy.cz/en/
 					link_NextPage = Get_LinkNextPage(html,URL)	
