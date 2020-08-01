@@ -281,26 +281,26 @@ def save_Result(dict_,path='',mode=0):
 		запись  и ДОзапись полученых данных в файл в формате json
 		path обязательно должен содержать имя файла
 	'''
-	timePars = time.strftime("%d-%m-%Y %H.%M.%S", time.localtime())
 
 	if path:
 		arr_path = re.split(r'[/\\\\]',path)
-		fileName = arr_path[len(arr_path)-1]
+		fileName = arr_path[len(arr_path)-1]	# TODO: добавить проверку на наличие имени файла в пути
 		dirName = arr_path[len(arr_path)-2]	
 		pathDir = os.path.dirname(os.path.abspath(__file__)) + dirName		
 		if not os.path.exists(pathDir) :
 			os.mkdir(pathDir)
 		path_ToFile = path
 	else:
-		path_ToFile = timeStart +' .json'
+		print('Нет пути к файлу для сохранения')
+		return False
 
 	# ЗАПИСЬ даннных в файл
-	with open(path_ToFile, 'w', encoding = 'utf-8') as file_handle:
-		file_handle.write('-=TEST-=-TEST-=-TEST-=-TEST-=-TEST-=-TEST=-')
-
-	# ДОзапись даннных в файл
-	***************************************
-	протестить после исправления конфликта
+	if os.path.isfile(path_ToFile):		# до запись в существующий файл
+		with open(path_ToFile, 'a', encoding = 'utf-8') as file_handle:
+			file_handle.write(str(dict_))
+	else:		# запись в новый файл
+		with open(path_ToFile, 'w', encoding = 'utf-8') as file_handle:
+			file_handle.write(str(dict_))
 
 
 
